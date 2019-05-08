@@ -14,7 +14,7 @@
 #include <signal.h>
 
 #include "../Struct/struct.h"
-#include "/home/kalki/Documents/Python_Projects/MAV/PSU_MAV/VFS_2019/c_library_v2/ardupilotmega/mavlink.h"
+//#include "/home/kalki/Documents/Python_Projects/MAV/PSU_MAV/VFS_2019/c_library_v2/ardupilotmega/mavlink.h"
 
 // ------------------------------------------------------------------------------
 //   Defines

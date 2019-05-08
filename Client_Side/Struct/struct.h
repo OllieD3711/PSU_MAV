@@ -5,8 +5,7 @@
 #include <vector>
 #include <sys/time.h>
 #include <pthread.h>
-
-#include "/home/kalki/Documents/Python_Projects/MAV/PSU_MAV/VFS_2019/c_library_v2/ardupilotmega/mavlink.h"
+#include </home/oliver/MySoftware/AHSMAV/AhsMav/c_library_v2-master/ardupilotmega/mavlink.h>
 
 // ------------------------------------------------------------------------------
 //   Defines

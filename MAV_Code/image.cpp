@@ -17,6 +17,9 @@ Image::Image(int w, int h){
 		while(1);
 	}
 	
+        tf = tag36h11_create();
+        td = apriltag_detector_create();
+        apriltag_detector_add_family(td,tf);
 
 	capThreadActive=false;
 	boundThreadActive=false;
@@ -48,6 +51,8 @@ void Image::stopProcessing(){
 			#ifdef DISPLAY_MESSAGES
 			cout<<"\nJoined thread that processed images."<<std::flush;
 			#endif
+                        apriltag_detector_destroy(td);
+                        tag36h11_destroy(tf);
 		}
 	}
 }
@@ -565,4 +570,106 @@ cv::Mat Image::detectBoundary(cv::Mat imgHSV, float alt, int &direction, float &
 }
 
 
+cv::Mat Image::detectApril(cv::Mat img, vector<tagPoseInfo> *tagLocs)
+{
+    /*// Create tag library to use
+    apriltag_family_t *tf = NULL;
+    tf = tag36h11_create();
 
+    // Create tag detector object and assign the library
+    apriltag_detector_t *td = apriltag_detector_create();
+    apriltag_detector_add_family(td,tf);
+    */
+
+    // Set detector parameters
+    /* quad_decimate - decimates/discard the input image by this factor
+     *                  (1.0 uses entire input image)
+     * quad_sigma - Adds gaussian blur to image
+     * refine_edges - spends more time refining edges of tags
+     * decode_sharpening
+     */
+    td->quad_decimate = 2.0;
+    td->quad_sigma = 0.0;
+    td->refine_edges = 1;
+    td->decode_sharpening = 0.25;
+
+    // Convert image to format which can be used by detector
+    Mat gray;
+    cvtColor(img,gray,COLOR_BGR2GRAY);
+
+    // Make an image_u8_t header for the Mat data
+    image_u8_t im = {.width = gray.cols,
+                    .height = gray.rows,
+                    .stride = gray.cols,
+                    .buf = gray.data};
+
+    // Detect april tags within image
+    zarray_t *detections = apriltag_detector_detect(td,im);
+
+    // Draw detection outlines
+    for (int i = 0; i < zarray_size(detections); i++){
+        apriltag_detection_t *det;
+        zarray_get(detections,i,&det);
+
+        // Draw tag square
+        line(img, Point(det->p[0][0], det->p[0][1]),
+                Point(det->p[1][0], det->p[1][1]),
+                Scalar(0,0xff,0),2);
+        line(img, Point(det->p[0][0], det->p[0][1]),
+                Point(det->p[3][0], det->p[3][1]),
+                Scalar(0,0,0xff),2);
+        line(img, Point(det->p[1][0], det->p[1][1]),
+                Point(det->p[2][0], det->p[2][1]),
+                Scalar(0xff,0,0),2);
+        line(img, Point(det->p[2][0], det->p[2][1]),
+                 Point(det->p[3][0], det->p[3][1]),
+                 Scalar(0xff, 0, 0), 2);
+
+        // Calculate pose of tag
+        apriltag_detection_info_t info;
+        info.det = det;
+        info.tagsize = APRILSIZE*0.001; // in meters
+        info.fx = FOCALX;   // in pixels
+        info.fy = FOCALY;   // in pixels
+        info.cx = PRINCX;   // in pixels
+        info.cy = PRINCY;   // in pixels
+        apriltag_pose_t pose;
+        double err = estimate_tag_pose(&info,&pose);
+
+        // Store all detected tags in array
+        tagPoseInfo currentTag;
+        currentTag.Info = det;
+        currentTag.Pose = pose;
+        tagLocs->push_back(currentTag);
+
+        // Print tag id number to image
+        stringstream ss;
+        ss << det->id;
+        String text = ss.str();
+        int fontface = FONT_HERSHEY_SCRIPT_SIMPLEX;
+        double fontscale = 1.0;
+        int baseline;
+        Size textsize = getTextSize(text,fontface,fontscale,2,&baseline);
+        putText(img, text,Point(det->c[0] - textsize.width/2,
+                                det->c[1]+textsize.height/2),
+                fontface, fontscale, Scalar(0xff, 0x99, 0), 2);
+
+    }
+    apriltag_detections_destroy(detections);
+
+    return img;
+}
+
+
+void detTargetType(apriltag_detection_t *det, targetType *tt)
+{
+    int ID = det->id;
+    if ((ID == 119) || (ID == 120) || (ID == 121) || (ID == 122))
+        tt-isHelipad == true;
+    else if ((ID == 123) || (ID == 124) || (ID == 125) || (ID == 126))
+        tt->isFerry == true;
+    else if ((ID == 127) || (ID == 128) || (ID == 129) || (ID == 130))
+        tt->isBullseye\ == true;
+    else if ((ID == 131) || (ID == 132) || (ID == 133) || (ID == 134))
+        tt->isPickUp == true;
+}

@@ -4,7 +4,7 @@
 #include "Translater/translater.h"
 #include "TCP_Client/tcp_client.h"
 
-#include "/home/kalki/Documents/Python_Projects/MAV/PSU_MAV/VFS_2019/c_library_v2/ardupilotmega/mavlink.h"
+#include "/home/oliver/MySoftware/AHSMAV/AhsMav/c_library_v2-master/ardupilotmega/mavlink.h"
 
 // ------------------------------------------------------------------------------
 //   Prototypes

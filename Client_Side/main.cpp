@@ -145,7 +145,7 @@ int main()
 {
   Serial_Port serial_port("/dev/ttyACM0", 57600);
 	Translater translater(&serial_port);
-	TCP_Client tcp_client("10.20.101.124", 9999, &translater);
+        TCP_Client tcp_client("10.20.60.140", 9999, &translater);
 	//TCP_Client tcp_client("10.20.101.53", 8888, &translater);
 	//Autopilot_Interface autopilot_interface(&serial_port);
 
